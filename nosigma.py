@@ -1,11 +1,10 @@
 import time
 import requests
+import json
 from colorama import Fore
 
-auth = ""
-userid = ""
-channelid = ""
-filter_term = "sigma"
+data = json.loads(open("data.json", "r").read())
+auth, userid, channelid, filter_term = data.values()
 
 color = {
     'success': Fore.GREEN,
@@ -17,14 +16,14 @@ color = {
                                                                        
 def printTitle():
     print(f"""      
-    {Fore.RED} /$$   /$$  /$$$$$$  {Fore.BLACK} /$$$$$$  /$$$$$$  /$$$$$$  /$$      /$$  /$$$$$$ 
-    {Fore.RED}| $$$ | $$ /$$__  $${Fore.BLACK} /$$__  $$|_  $$_/ /$$__  $$| $$$    /$$$ /$$__  $$
-    {Fore.RED}| $$$$| $$| $$  \\ $${Fore.BLACK}| $$  \\__/  | $$  | $$  \\__/| $$$$  /$$$$| $$  \\ $$
-    {Fore.RED}| $$ $$ $$| $$  | $${Fore.BLACK}|  $$$$$$   | $$  | $$ /$$$$| $$ $$/$$ $$| $$$$$$$$
-    {Fore.RED}| $$  $$$$| $$  | $${Fore.BLACK} \\____  $$  | $$  | $$|_  $$| $$  $$$| $$| $$__  $$
-    {Fore.RED}| $$\\  $$$| $$  | $${Fore.BLACK} /$$  \\ $$  | $$  | $$  \\ $$| $$\\  $ | $$| $$  | $$
-    {Fore.RED}| $$ \\  $$|  $$$$$$/{Fore.BLACK}|  $$$$$$/ /$$$$$$|  $$$$$$/| $$ \\/  | $$| $$  | $$
-    {Fore.RED}|__/  \\__/ \\______/ {Fore.BLACK} \\______/ |______/ \\______/ |__/     |__/|__/  |__/
+    {Fore.RED} /$$   /$$  /$$$$$$  {Fore.MAGENTA} /$$$$$$  /$$$$$$  /$$$$$$  /$$      /$$  /$$$$$$ 
+    {Fore.RED}| $$$ | $$ /$$__  $${Fore.MAGENTA} /$$__  $$|_  $$_/ /$$__  $$| $$$    /$$$ /$$__  $$
+    {Fore.RED}| $$$$| $$| $$  \\ $${Fore.MAGENTA}| $$  \\__/  | $$  | $$  \\__/| $$$$  /$$$$| $$  \\ $$
+    {Fore.RED}| $$ $$ $$| $$  | $${Fore.MAGENTA}|  $$$$$$   | $$  | $$ /$$$$| $$ $$/$$ $$| $$$$$$$$
+    {Fore.RED}| $$  $$$$| $$  | $${Fore.MAGENTA} \\____  $$  | $$  | $$|_  $$| $$  $$$| $$| $$__  $$
+    {Fore.RED}| $$\\  $$$| $$  | $${Fore.MAGENTA} /$$  \\ $$  | $$  | $$  \\ $$| $$\\  $ | $$| $$  | $$
+    {Fore.RED}| $$ \\  $$|  $$$$$$/{Fore.MAGENTA}|  $$$$$$/ /$$$$$$|  $$$$$$/| $$ \\/  | $$| $$  | $$
+    {Fore.RED}|__/  \\__/ \\______/ {Fore.MAGENTA} \\______/ |______/ \\______/ |__/     |__/|__/  |__/
 
      > by renascent{Fore.WHITE}
     """)
@@ -33,8 +32,16 @@ def getMessages(auth=auth, channelid=channelid, userid=userid, filter_term=filte
     headers = {'Content-Type': 'application/json', 'authorization': auth }
     messages = []
     offset = 0
+    # figure out if it is a server or not
+    if '/' in channelid:
+        c = channelid.split('/')
+        c = { 'serverid': c[0], 'channelid': c[1] }
+        url = f"https://discord.com/api/v9/guilds/{c['serverid']}/messages/search?channel_id={c['channelid']}&content=nigger&author_id={userid}"
+    else:  
+        url = f"https://discord.com/api/v9/channels/{channelid}/messages/search?author_id={userid}&content={filter_term}&offset={offset}"
+
     while len(messages) < 50 or offset != 200:
-        r = requests.get(f"https://discord.com/api/v9/channels/{channelid}/messages/search?author_id={userid}&content={filter_term}&offset={offset}", headers=headers)
+        r = requests.get(url, headers=headers)
 
         tempm = []
         for e in r.json()["messages"]:
@@ -67,10 +74,11 @@ def doMainChoices():
     (---------------------------------------------------------------------------)
     > Menu
      {color["default"]}1. {color["choice"]}start                                #
-     {color["default"]}2. {color["choice"]}set channel                          | {color['item']}{channelid}
-     {color["default"]}3. {color["choice"]}set auth                             : {color['item']}{auth}
-     {color["default"]}4. {color["choice"]}set user_id                          | {color['item']}<@{userid}>
-     {color["default"]}5. {color["choice"]}set custom word                      : {color['item']}{filter_term}
+     {color["default"]}2. {color["choice"]}save data                            | 
+     {color["default"]}3. {color["choice"]}set channel                          | {color['item']}{channelid}
+     {color["default"]}4. {color["choice"]}set auth                             : {color['item']}{auth}
+     {color["default"]}5. {color["choice"]}set user_id                          | {color['item']}<@{userid}>
+     {color["default"]}6. {color["choice"]}set custom word                      : {color['item']}{filter_term}
      {color["default"]}0. {color["choice"]}exit{color["default"]}
     """)
     def getInp(txt=": > "): return input(color["input"] + txt + color["default"])
@@ -87,18 +95,28 @@ def doMainChoices():
             doScript()
             break
         elif choice == 2:
+            # save data
+            newdata = {
+                "auth": auth,
+                "channelid": channelid,
+                "userid": userid,
+                "filter_term": filter_term
+            }
+            open("data.json", "w").write(json.dumps(newdata))
+
+        elif choice == 3:
             print("enter new channel id")
             channelid = getInp() 
             print(f"{color["success"]}!set channel id to {color['item'] + channelid}{color["default"]}")
-        elif choice == 3:
+        elif choice == 4:
             print("enter new authentification")
             auth = getInp()
             print(f"{color["success"]}!set auth to {color['item'] + auth}{color["default"]}")
-        elif choice == 4:
+        elif choice == 5:
             print("enter new user id")
             userid = getInp()
             print(f"{color["success"]}!set user id to {color['item'] + userid}{color["default"]}")
-        elif choice == 5:
+        elif choice == 6:
             print("enter new custom word")
             filter_term = getInp()
             print(f"{color["success"]}!set custom word to {color['item'] + filter_term}{color["default"]}")
@@ -132,8 +150,11 @@ def doScript():
         if (a == 1):
             # do deletions
             rate_limit = 0
+            cid = channelid
+            if '/' in channelid:
+                cid = channelid.split('/')[1]
             for m in msgs:
-                r = requests.delete(f"https://discord.com/api/v9/channels/{channelid}/messages/{m["msg_id"]}", headers={'Content-Type': 'application/json', 'authorization': auth })
+                r = requests.delete(f"https://discord.com/api/v9/channels/{cid}/messages/{m["msg_id"]}", headers={'Content-Type': 'application/json', 'authorization': auth })
                 if r.status_code > 400:
                     rate_limit += .1
                 elif rate_limit > 0:
