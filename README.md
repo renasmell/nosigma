@@ -1,7 +1,7 @@
 <h1 align="center">nosigma</h1>
 disclaimer: use at your own risk. discord does not condone this is any way.
 
-<img src="https://github.com/user-attachments/assets/30b71391-30ab-423a-a40a-51418de6b62d">
+<img src="https://github.com/user-attachments/assets/f0ae9603-7a4a-455f-9617-a82f9a55c11b">
 
 ## **What it is**
     - a cli that allows you to delete past messages sent by you (containing a term) semi-automatically!
