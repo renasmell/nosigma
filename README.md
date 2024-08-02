@@ -16,4 +16,8 @@ disclaimer: use at your own risk. discord does not condone this is any way.
 2. cd into directory via any terminal
 3. pip install -r requirements.txt (if you have not already installed libraries)
 4. py nosigma.py
-5. (optional) set the variables at the top so it's easier to use without having to re-enter auth, id, etc (too lazy to save via json)
+
+## tips
+
+- set channel id (choice #3) takes either `channelid` or `serverid/channelid` one being for private dms the other for servers
+- data is not saved automatically. please save it by using choice #2 (save data)
